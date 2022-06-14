@@ -1,0 +1,3 @@
+https://www.bleepingcomputer.com/news/security/apple-ios-vulnerable-to-homekit-doorlock-denial-of-service-bug/
+https://uk.pcmag.com/smart-home/137960/doorlock-vulnerability-can-force-ios-devices-to-endlessly-reboot
+https://www.laptopmag.com/news/ios-1521-update-now-available-it-fixes-the-doorlock-bug-that-could-wreck-your-iphone

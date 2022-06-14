@@ -1,0 +1,4 @@
+https://therecord.media/threat-actor-uses-hp-ilo-rootkit-to-wipe-servers/
+https://www.carlballenger.com/2022/01/05/rootkit-ilo-bleed-targeting-hp-enterprise-servers-with-data-wiping-attacks/
+https://www.secplicity.org/2021/12/29/hp-ilo-and-the-newly-discovered-ilobleed-rootkit/
+https://securityaffairs.co/wordpress/126157/malware/ilobleed-wiper-hp-servers.html

@@ -1,0 +1,3 @@
+https://isc.sans.edu/forums/diary/The+Rise+and+Fall+of+log4shell/28372/
+https://www.cynet.com/log4shell/
+https://www.lunasec.io/docs/blog/log4j-zero-day/

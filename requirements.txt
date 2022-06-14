@@ -1,0 +1,13 @@
+trafilatura
+flair
+argparse
+pdfkit
+pathpy
+bs4
+pandas
+numpy
+torch
+spacy
+nest_asyncio
+transformers
+sklearn

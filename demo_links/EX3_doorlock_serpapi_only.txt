@@ -1,0 +1,24 @@
+https://malware.guide/article/apple-homekit-bug-could-make-ios-devices-unusable/
+https://www.theverge.com/2022/1/12/22880493/apple-15-2-1-patch-ios-homekit-denial-of-service-vulnerability-fix
+https://9to5mac.com/2022/01/12/apple-confirms-ios-15-2-1-patches-homekit-denial-of-service-vulnerability/
+https://hack.technoherder.com/apple-macos-and-ios-vulnerabilities/
+https://thehackernews.com/2022/01/researchers-detail-new-homekit-doorlock.html
+https://www.bleepingcomputer.com/news/security/apple-ios-vulnerable-to-homekit-doorlock-denial-of-service-bug/
+https://www.theverge.com/2022/1/3/22865145/apple-ios-vulnerability-homekit-devices-bug-crash
+https://tittlepress.com/tech/1445312/
+https://thehackernews.com/search?q=security&updated-max=2022-01-31T20:00:00-08:00&max-results=20&start=610&by-date=false
+https://trevorspiniolas.com/doorlock/doorlock.html
+https://threatpost.com/cisco-patches-denial-of-service-vulnerabilities-in-ios/105109/
+https://www.itsecurityguru.org/2022/01/04/43509/
+https://www.techworm.net/2022/01/apple-homekit-bug-can-kill-ios-devices.html
+https://www.imore.com/apple-says-ios-1521-fixes-its-homekit-denial-service-vulnerability
+https://arstechnica.com/information-technology/2022/01/5-months-on-apple-has-yet-to-fix-ios-bug-that-sends-devices-into-a-crash-spiral/
+https://www.blackhatethicalhacking.com/news/apple-ios-vulnerable-to-homekit-doorlock-denial-of-service-bug/
+https://www.idstrong.com/sentinel/apple-ios-users-should-be-aware-of-the-doorlock-homekit-bug-/
+https://somcert.gov.so/apple-ios-vulnerable-to-homekit-doorlock-bug/
+https://www.jn66dataanalytics.com/news/researchers-detail-new-homekit-doorlock-bug-affecting-apple-ios-the-hacker-news
+https://news.abplive.com/technology/gadgets/ios-15-2-1-ipados-15-2-1-released-to-fix-homekit-denial-of-service-vulnerability-know-details-1506102
+https://www.cvedetails.com/product/15556/Apple-Iphone-Os.html?vendor_id=49', 'https://scriptlog.nsupdate.info/news/security/apple-ios-vulnerable-to-homekit-doorlock-denial-of-service-bug/
+https://www.forbes.com/sites/daveywinder/2022/05/17/ios-155-apple-issues-massive-iphone-security-update-for-millions-of-users/
+https://www.cvedetails.com/vulnerability-list/vendor_id-49/product_id-15556/Apple-Iphone-Os.html
+https://www.gizchina.com/2022/01/07/ios-15-2-devices-are-vulnerable-to-homekit-doorlock-issue/
