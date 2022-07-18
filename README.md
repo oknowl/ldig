@@ -28,7 +28,7 @@ The following packages are required to run this application:
 The models should get downloaded automatically during first operation.
 
 ## Usage
-```
+```txt
 python3 ldig.py [-h] [-I INFILE] [-i INSTRING] [-t NLP_THRESHOLD] [-e SEARCH_ENGINE] [-l LAYER_DEPTH] [-s] [-g] [-d] [-p] [-f] [-x] [-v] [-vv]
 
 -h  Help
@@ -47,6 +47,13 @@ python3 ldig.py [-h] [-I INFILE] [-i INSTRING] [-t NLP_THRESHOLD] [-e SEARCH_ENG
 -vv Verbose DEBUG LOG to STDOUT
 ```
 
+### Example
+
+```bash
+python3 ldig.py -h
+python3 ldig.py -l 0 -i https://www.cnbc.com/2021/03/09/microsoft-exchange-hack-explained.html
+python3 ldig.py -i https://www.cnbc.com/2021/03/09/microsoft-exchange-hack-explained.html
+```
 
 ### Configuratoion file
 Things like savelocations or API-keys can be configured in the configuration file `conf/conf.py`
