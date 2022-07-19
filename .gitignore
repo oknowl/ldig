@@ -1,0 +1,4 @@
+*.local
+env
+__pycache__
+ldig_data

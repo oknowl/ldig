@@ -20,14 +20,15 @@ import pathpy as pp
 import xml.etree.cElementTree as ET
 from csv import writer as csvwriter
 from urllib.parse import urlparse
-from dateutil.parser import parse
-from dateparser.search import search_dates
+#from dateutil.parser import parse
+#from dateparser.search import search_dates
 from bs4 import BeautifulSoup
 from statistics import median
-import pandas as pd
-
+#import pandas as pd
 import spacy
 from spacy import displacy
+from log import log
+
 try:
     nlp = spacy.load('en_core_web_lg')
 except OSError:
@@ -43,44 +44,8 @@ except ModuleNotFoundError:
     graph_path = 'OUTPUT/graph/'
     exclusion_list = ['facebook', 'youtube', 'wikipedia','reddit', 'login', 'register']
 
-# =========================================================================================================================================================
-# logging
-import logging
-from pprint import pformat
-LOGGER = logging.getLogger('[+]')
+LOG = log()
 
-def LOG_DEBUG(msg):
-    if isinstance(msg, str):
-        LOGGER.debug("\t\t" + msg + "...")
-    else:
-        LOGGER.debug("\t\t" + json.dumps(msg, indent=4) + "...")
-def LOG_INFO(msg):
-    if isinstance(msg, str):
-        LOGGER.info("\t\t" + msg + "...")
-    else:
-        LOGGER.info("\t\t" + json.dumps(msg, indent=4) + "...")
-def LOG(msg):
-    LOG_INFO(msg)
-def ENABLE_LOGS():
-    LOGGER.setLevel(logging.INFO)
-    loggers=[(name) for name in logging.root.manager.loggerDict if name.startswith("trafilatura")]
-    for i in loggers:
-        logging.getLogger(i).setLevel(logging.WARNING) 
-def ENABLE_DEBUG():
-    LOGGER.setLevel(logging.DEBUG)
-    loggers=[(name) for name in logging.root.manager.loggerDict if name.startswith("trafilatura")]
-    for i in loggers:
-        logging.getLogger(i).setLevel(logging.INFO) 
-def DISABLE_LOGS():
-    LOGGER.setLevel(logging.CRITICAL)
-    loggers=[(name) for name in logging.root.manager.loggerDict if name.startswith("trafilatura")]
-    for i in loggers:
-        logging.getLogger(i).setLevel(logging.CRITICAL)
-
-LOG_DEBUG("Python version")
-LOG_DEBUG(sys.version)
-LOG_DEBUG("Version info.")
-LOG_DEBUG(sys.version_info)
 # =========================================================================================================================================================
 # download URL and parse for data to db
 def get_all_contents(url, db):
@@ -116,10 +81,10 @@ def get_all_contents(url, db):
 
         # METADATA parsing
         db = helper_parsing_meta(url, downloaded, db)
-        
+
         # LINKS parsing
         found_links = helper_parsing_links(downloaded, url)
-        
+
         # merge new links into db
         if found_links:
             for i in found_links:
@@ -133,11 +98,11 @@ def get_all_contents(url, db):
 
 # fill db with extracted components
 def helper_parsing_meta(url, downloaded, db):
-    LOG_DEBUG("Helper parsing: Start parsing for metadata: " + url)
+    LOG.DEBUG("Helper parsing: Start parsing for metadata: " + url)
     # TITLE EXTRACTION
     bare = trafilatura.bare_extraction(downloaded, include_comments=False, include_links=False, output_format='python')
     if bare['title']:
-        LOG_DEBUG("found title:\t" + bare['title'])  # DEBUG OUTPUT
+        LOG.DEBUG("found title:\t" + bare['title'])  # DEBUG OUTPUT
         title = bare['title']
         db[url][1] = title
 
@@ -152,22 +117,22 @@ def helper_parsing_meta(url, downloaded, db):
 
     # DESCRIPTION EXTRACTION
     if bare['description']:
-        LOG_DEBUG("descr.:\t" + bare['description'])  # DEBUG OUTPUT
+        LOG.DEBUG("descr.:\t" + bare['description'])  # DEBUG OUTPUT
         description = bare['description']
         db[url][3] = description
-    
+
     # DATE EXTRACTION
     found_date = bare['date']
     if found_date:
         LOG('found date(s): ' + str(found_date))
         db[url][4] = found_date
-    
+
     # CVE EXTRACTION
     found_cves = find_cves(main_body)
     if find_cves:
         LOG('Found CVE: ' + str(found_cves))
         db[url][5] = found_cves
-    
+
     # NLP keyword generation
     # geting keywords: title
     if title:
@@ -194,8 +159,8 @@ def helper_parsing_meta(url, downloaded, db):
         temp_senti = 0
         senti_scores = []
         for i in range(0, len(sentences)):
-            LOG_DEBUG('curr_sentence: ')
-            LOG_DEBUG(str(sentences[i]))
+            LOG.DEBUG('curr_sentence: ')
+            LOG.DEBUG(str(sentences[i]))
             try:
                 temp_senti = helper_get_sentiment(sentences[i])
                 senti_scores.append(temp_senti)
@@ -295,7 +260,7 @@ def draw_graph_full(graph, db):
         pageranged = pp.algorithms.centralities.pagerank(graph, alpha=0.85, max_iter=50, tol=1e-03, weighted=False)
         top = sorted(pageranged.items(), key=lambda x: x[1])[-3:]
         nodecolors = {}
-        
+
         for key in db.keys():
             if key in graph.nodes.keys():
                 nodecolors[key] = '#0008ff'
@@ -323,7 +288,7 @@ def save_graph_domain(graph, db):
         nodecolors = {}
         for key in db.keys():
             nodecolors[helper_get_domain(key)] = '#1954a0'  # blue = in db
-            
+
         for olink in original_links:
             if helper_get_domain(olink) in graph.nodes.keys():
                 nodecolors[helper_get_domain(olink)] = '#19a08e' # türkis = origi
@@ -358,11 +323,11 @@ def save_graph_full(graph, db):
         nodecolors = {}
         for key in db.keys():
             nodecolors[key] = '#1954a0'  # blue = in db
-            
+
         for olink in original_links:
             if olink in graph.nodes.keys():
                 nodecolors[olink] = '#19a08e' # türkis = origi
-            
+
         nodecolors[top[0][0]] = '#e5fc35'
         nodecolors[top[1][0]] = '#a6fc35'
         nodecolors[top[2][0]] = '#4ffc35'
@@ -508,12 +473,12 @@ def get_bert_similarities(sents):
 def helper_parsing_links(downloaded, url):
     LOG("Helper parsing: Start parsing for links")
     output=[]
-    
+
     # -1) check for valid trafilatura output
     LOG("Checking if content is valid and usable with trafilatura (trafilatura: 1/3)")
     bare = trafilatura.bare_extraction(downloaded, include_comments=False, include_links=True, output_format='python')
-    if bare['title']: LOG_DEBUG("title:\t" + bare['title'])  # DEBUG OUTPUT
-    if bare['description']: LOG_DEBUG("descr.:\t" + bare['description'])  # DEBUG OUTPUT
+    if bare['title']: LOG.DEBUG("title:\t" + bare['title'])  # DEBUG OUTPUT
+    if bare['description']: LOG.DEBUG("descr.:\t" + bare['description'])  # DEBUG OUTPUT
     if bare["title"] == None:  # or bare["body"]:
         LOG("\t\tGot error in trafilatura. Trying to clean HTML..")
         downloaded_wo_unicode = unicodedata.normalize('NFKD', downloaded).encode('ascii', 'ignore')
@@ -521,20 +486,20 @@ def helper_parsing_links(downloaded, url):
         downloaded = soup.prettify(formatter="html")
         LOG("Checking if content is valid and usable with trafilatura again")
         bare = trafilatura.bare_extraction(downloaded, include_comments=False, include_links=True, output_format='python')
-        LOG_DEBUG(bare['title'])  # DEBUG OUTPUT
-        LOG_DEBUG(bare['description'])  # DEBUG OUTPUT
+        LOG.DEBUG(bare['title'])  # DEBUG OUTPUT
+        LOG.DEBUG(bare['description'])  # DEBUG OUTPUT
     LOG("-> Got valid content")
 
     # 0) get links with trafilatura
-    LOG_DEBUG("Trying to get links with trafilatura (trafilatura: 2/3)")
+    LOG.DEBUG("Trying to get links with trafilatura (trafilatura: 2/3)")
 
     my_xml = trafilatura.extract(downloaded, output_format='xml', include_comments=False, include_links=True)
-    LOG_DEBUG("Extraction done with trafilatura. Starting to parse XML")
+    LOG.DEBUG("Extraction done with trafilatura. Starting to parse XML")
     tree=ET.fromstring(my_xml)
     subtree=tree.findall(".//ref[@target]")
-    LOG_DEBUG("Got XML subtree with relevant links")
+    LOG.DEBUG("Got XML subtree with relevant links")
     all_links = list(map(lambda el: {"link text": el.text, "href": el.get('target')}, subtree))
-    LOG_DEBUG("trafilatura links"); LOG_DEBUG(all_links)  # DEBUG OUTPUT
+    LOG.DEBUG("trafilatura links"); LOG.DEBUG(all_links)  # DEBUG OUTPUT
     for i in all_links:
         if not i["href"].startswith("#") and not i["href"].startswith("/") and not i['href'].startswith("javascript"):   # ignore local anchors
             if i["link text"]:
@@ -544,15 +509,15 @@ def helper_parsing_links(downloaded, url):
     LOG("-> Done extracting links with trafilatura")
 
     # 1) get main body with trafilatura
-    LOG_DEBUG("Trying to get main body with trafilatura (trafilatura: 3/3)")
+    LOG.DEBUG("Trying to get main body with trafilatura (trafilatura: 3/3)")
     main_body_xml = trafilatura.extract(downloaded, output_format='xml', include_comments=False, include_links=False)
     tree=ET.fromstring(main_body_xml)
     main_body=' '.join(list(map(lambda el: str(ET.tostring(el).decode()).strip(), tree.findall(".//main/"))))
-    LOG_DEBUG(main_body)
-    LOG_DEBUG("-> Got main body with trafilatura (trafilatura: 3/3)")
-    
+    LOG.DEBUG(main_body)
+    LOG.DEBUG("-> Got main body with trafilatura (trafilatura: 3/3)")
+
     # 2) get all a href tag + word before from plain HTML
-    LOG_DEBUG("Trying to extract href tag + word before from plain HTML")
+    LOG.DEBUG("Trying to extract href tag + word before from plain HTML")
     regex = r"([^\s<>]+)\s*?(?:<[^<]*?>\s*)*?<a\s+(?:[^>]*?\s+)?href=([\"'])([^\"']*?)\2[^>]*>(?:<[^<]*?>\s*)*(.+?)(?:<[^<]*?>\s*)*?</a>"
     matches = re.finditer(regex, downloaded, re.M)
     potential_urls=[]
@@ -560,25 +525,25 @@ def helper_parsing_links(downloaded, url):
         if not match.group(3).startswith("#") and not match.group(3).startswith("javascript") and not match.group(3).startswith("/"):     # ignore local anchors
             link_text =re.sub(re.compile('<.*?>'), '',  match.group(4))  # strip all html tags for match.group(4)
             potential_urls.append({"link text": link_text, "href": match.group(3), "word_before": match.group(1), "entire_html_code": match.group()})
-    LOG_DEBUG("Potential links according to hrefs in HTML")
-    LOG_DEBUG(potential_urls)
-    LOG_DEBUG("-> Done extraction href tag + word before from plain HTML")
- 
+    LOG.DEBUG("Potential links according to hrefs in HTML")
+    LOG.DEBUG(potential_urls)
+    LOG.DEBUG("-> Done extraction href tag + word before from plain HTML")
+
     # 3) match href tags with trafilatura-detected website content
-    LOG_DEBUG("Trying to match href tags with trafilatura-detected website content")
+    LOG.DEBUG("Trying to match href tags with trafilatura-detected website content")
     for u in potential_urls:
-        LOG_DEBUG("Checking: " + u['href'] + " in main body")
-        LOG_DEBUG(".. \"word before\" is " + u['word_before'])
+        LOG.DEBUG("Checking: " + u['href'] + " in main body")
+        LOG.DEBUG(".. \"word before\" is " + u['word_before'])
         regex = re.escape(u['word_before'].strip())+r"\s*"+re.escape(u['link text'].strip())
         matches = re.finditer(regex, main_body)
         for matchNum, match in enumerate(matches, start=1):
             LOG("Found: " + u['href'] + " in main body")
             output.append({"link text": u['link text'].strip().replace('\n', ' '), "href": u['href']})
-    LOG_DEBUG("-> Done matching href tags with trafilatura-detected website content")
-    
+    LOG.DEBUG("-> Done matching href tags with trafilatura-detected website content")
+
     output = [dict(t) for t in {tuple(d.items()) for d in output}]     # remove duplicates (check name AND href!)
     LOG("Parsing done. Got " + str(len(output)) + " links")
-    
+
     # remove same site urls
     for i in output:
         if helper_get_domain(i['href']) == helper_get_domain(url):
@@ -591,10 +556,10 @@ def helper_parsing_links(downloaded, url):
     return output
 
 # fetch html with chrome stealth browser
-def helper_fetch_html_chrome_headless(url):   
-    LOG_DEBUG("-------------------------------------------------------------------------------")
+def helper_fetch_html_chrome_headless(url):
+    LOG.DEBUG("-------------------------------------------------------------------------------")
     async def run_chrome(url):
-        LOG_DEBUG("Starting headless chrome browser...")
+        LOG.DEBUG("Starting headless chrome browser...")
         browser = await launch(headless=True)
         page = await browser.newPage()
 
@@ -603,7 +568,7 @@ def helper_fetch_html_chrome_headless(url):
 
         # click on twitter "Accept all cookies"
         if url.startswith("https://twitter.com"):
-            LOG_DEBUG("Try to click on _Accept all cookies_")
+            LOG.DEBUG("Try to click on _Accept all cookies_")
             start = process_time()
             btn = []
             while len(btn) == 0:
@@ -618,11 +583,11 @@ def helper_fetch_html_chrome_headless(url):
                   await i.click()
                 except:
                   print("")
-            LOG_DEBUG("Clicked...")
+            LOG.DEBUG("Clicked...")
 
         content = await page.content()  # evaluate('document.body.textContent', force_expr=True)
         LOG('Got content with headless browser')
-        LOG_DEBUG(content)
+        LOG.DEBUG(content)
         # await page.screenshot({'path': 'example.png'})
         await browser.close()
         return(content)
@@ -711,16 +676,15 @@ def dump_db(db):
     for i, key in enumerate(db.keys()):
         out_csv += str(i) + ', ' + str(key) + ', ' + str(len(db[key][0])) + ', ' + str(db[key][4]) + ', ' + str(db[key][5]) + ', ' + str(db[key][6]) + ', ' + str (db[key][7]) + ', ' + str(get_graph_top(graph, len(db.keys()))[key]) + '\n'
     #out_csv = pd.DataFrame(out_csv)
-    # transpose 
+    # transpose
     #out_csv = pd.out_csv.transpose()
-    # saving the dataframe 
+    # saving the dataframe
     # out_csv.to_csv('db.csv')
     save_file('db.csv', out_csv)
     print('saved csv')
 
 # experimental export function
 def dump_db2(db):
-    
     row = [
         'index',
         'original_link',
@@ -785,7 +749,7 @@ def start_api(port):
     if __name__ == '__main__':
         LOG('[+] - Starting API')
         app.run(debug=False, host='0.0.0.0', port=port)
-         
+
 # ========
 
 # parse commandline arguments
@@ -816,11 +780,11 @@ original_links = []
 db = {}
 
 
-DISABLE_LOGS()
+LOG.DISABLE_LOGS()
 if args.verbose:
-    ENABLE_LOGS()
+    LOG.ENABLE_LOGS()
 if args.vverbose:
-    ENABLE_DEBUG()
+    LOG.ENABLE_DEBUG()
 
 
 
@@ -839,7 +803,7 @@ if args.instring != None and not os.path.isfile(args.instring):
 # save original sources for comparison later
 if queue:
     original_links = queue.copy()
-    LOG_DEBUG('ORIGINAL LINKS: ' + str(original_links))
+    LOG.DEBUG('ORIGINAL LINKS: ' + str(original_links))
 
 # do sentiment output
 if args.sentiment:
@@ -899,7 +863,7 @@ while queue != None and len(queue) != 0:
                 LOG('[NLP] - Comparison String: ' + nlp_links[x] + '\t' + nlp_texts[x][0:50])
                 continue
             LOG(str(x) + ': ' + str(a[x-1]) + "\t" + nlp_links[x][0:50])
-            
+
             # save similarity to db
             if nlp_links[x] in db.keys():
                 db[nlp_links[x]][6] = a[x-1]
@@ -910,7 +874,7 @@ while queue != None and len(queue) != 0:
             else:
                 threshold = 0.72
             if a[x-1] < threshold:
-                LOG_DEBUG(str(x) + ' TO BE REMOVED: ' + str(a[x-1]) + "\t" + nlp_links[x][0:50])
+                LOG.DEBUG(str(x) + ' TO BE REMOVED: ' + str(a[x-1]) + "\t" + nlp_links[x][0:50])
                 not_relevant_links.append(nlp_links[x])
 
         # remove not relevant links and data from db
